@@ -1,0 +1,71 @@
+﻿@model MyTasks.Core.ViewModels.TaskViewModel
+
+
+@{
+    ViewBag.Title = Model.Heading;
+}
+
+<h1>@Model.Heading</h1>
+
+@using (Html.BeginForm("Task", "Task"))
+{
+    <p class="alert alert-info mt-4 mb-4">
+        Pola tytuł, opis i kategoria są <strong>wymagane</strong>
+    </p>
+
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(x => x.Task.Id)
+
+
+    <div class="form-group">
+        @Html.LabelFor(x => x.Task.Title)
+        @Html.TextBoxFor(x => x.Task.Title, new { @class = "form-control", autofocus = "autofocus" })
+        @Html.ValidationMessageFor(x => x.Task.Title)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(x => x.Task.Description)
+        @Html.TextBoxFor(x => x.Task.Description, new { @class = "form-control" })
+        @Html.ValidationMessageFor(x => x.Task.Description)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(x => x.Task.CategoryId)
+        @Html.DropDownListFor(x => x.Task.CategoryId, new SelectList(Model.Categories, "Id", "Name"), "-- Wybierza kategorię --",
+        new { @class = "form-control" })
+        @Html.ValidationMessageFor(x => x.Task.CategoryId)
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(x => x.Task.Term)
+        @Html.TextBoxFor(x => x.Task.Term, "{0:dd-MM-yyyy}", new { @class = "form-control", @id = "Term", autocomplete = "off" })
+        @Html.ValidationMessageFor(x => x.Task.Term)
+    </div>
+
+    if (Model.Task.Id > 0)
+    {
+        <div class="form-check">
+            @Html.CheckBoxFor(x => x.Task.IsExecute, new { @class = "form-check-input" })
+            @Html.LabelFor(x => x.Task.IsExecute)
+        </div>
+    }
+
+    <button type="submit" class="btn btn-primary btn-lg mt-2">Zapisz</button>
+
+}
+
+
+@section scripts{ 
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#Term').datepicker({
+                format: "dd-mm-yyyy",
+                language: "pl",
+                multidate: false,
+                autoclose: true,
+                todayHighlight: true,
+                forceParse: false
+            });
+        })
+    </script>
+}

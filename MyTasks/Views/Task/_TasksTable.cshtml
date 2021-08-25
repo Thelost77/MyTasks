@@ -1,0 +1,55 @@
+﻿@model IEnumerable<MyTasks.Core.Models.Domains.Task>
+
+<div id="tasksTable">
+    <table class="table mt-3 table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Tytuł</th>
+                <th scope="col">Opis</th>
+                <th scope="col">Kategoria</th>
+                <th scope="col">Termin</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var task in Model)
+                {
+                    <tr>
+                        <td>
+                            <a href="@Url.Action("Task", "Task", new { id = task.Id})" class="font-weight-bold">
+                                @task.Title
+                            </a>
+                        </td>
+                        <td>@task.Description</td>
+                        <td>@task.Category.Name</td>
+                        <td>@task.Term?.ToString("dd-MM-yyyy")</td>
+                        <td>
+                            @if (!task.IsExecute)
+                            {
+                                <button class="btn btn-success btn-sm mr-2"
+                                        onclick="finishTask('@task.Id', this)">
+                                    Zrealizuj
+                                </button>
+                            }
+                            <button class="btn btn-danger btn-sm"
+                                    onclick="deleteTask('@task.Id', this)">
+                                Usuń
+                            </button>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-center">
+                        Brak zaplanowanych zadań do wykonania!
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+</div>
