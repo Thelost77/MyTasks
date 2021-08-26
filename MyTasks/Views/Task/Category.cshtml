@@ -1,0 +1,87 @@
+﻿@model IEnumerable<MyTasks.Core.Models.Domains.Category>
+
+@{
+    ViewData["Title"] = "Kategorie";
+}
+<h1 class="mb-1" align="center">Moje kategorie</h1>
+
+<div align="right">
+    <button class="btn btn-danger mb-1" onclick='window.location.href = "@Url.Action("AddCategory","Task")"'>Dodaj Kategorię</button>
+</div>
+
+<div id="tasksTable">
+    <table class="table mt-3 table-bordered text-center">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Id</th>
+                <th scope="col">Nazwa</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var category in Model)
+            {
+                <tr>
+                    <td>
+                        @if (category.Name == "Ogólna")
+                        {
+                            <div class="font-weight-bold">
+                                @category.Id
+                            </div>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("AddCategory", "Task", new { id = category.Id})" class="font-weight-bold">
+                                @category.Id
+                            </a>
+                        }
+
+                    </td>
+                    <td>@category.Name</td>
+                    <td>
+                        @if (category.Name != "Ogólna")
+                        {
+                            <button class="btn btn-danger btn-sm"
+                                    onclick="deleteTask('@category.Id', this)">
+                                Usuń
+                            </button>
+                        }
+                    </td>
+                </tr>
+
+            }
+
+
+        </tbody>
+    </table>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+
+         function deleteTask(id, btn) {
+            if (!confirm("Czy napewno chcesz usunąć kategorię?"))
+                return;
+
+            $.ajax({
+                    type: "Post",
+                    url: "@Url.Action("DeleteCategory","Task")",
+                    data: {
+                        id: id
+                    },
+                success: function (data) {
+                    if (data.success) {
+                        var row = btn.parentNode.parentNode;
+                        row.parentNode.removeChild(row);
+                    } else {
+                        alert(data.message);
+                    }
+                    },
+                    error: function (data) {
+                        alert(data.message)
+                    },
+                    dataType: "json"
+                });
+        }
+    </script>
+}

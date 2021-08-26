@@ -23,7 +23,7 @@ namespace MyTasks.Controllers
 
         public TaskController(ITaskService taskService)
         {
-            _taskService = taskService;
+            _taskService = taskService; 
         }
 
         public IActionResult Tasks()
@@ -35,7 +35,7 @@ namespace MyTasks.Controllers
             {
                 FilterTask = new Core.Models.FilterTask(),
                 Tasks = _taskService.Get(userId),
-                Categories = _taskService.GetCategiories()
+                Categories = _taskService.GetCategories(userId)
             };
 
             return View(vm);
@@ -62,14 +62,23 @@ namespace MyTasks.Controllers
                 new Task { Id = 0, UserId = userId, Term = DateTime.Today } :
                 _taskService.Get(id, userId);
 
+            if (!_taskService.GetCategories(userId).Any())
+            {
+                var category = new Category
+                {
+                    Name = "Ogólna",
+                    UserId = userId
+                };
+                _taskService.Add(category);
+            }
+
             var vm = new TaskViewModel
             {
                 Task = task,
                 Heading = id == 0 ?
                 "Dodawanie nowego zadania" : "Edytowanie zadania",
-                Categories = _taskService.GetCategiories()
+                Categories = _taskService.GetCategories(userId)
             };
-
 
             return View(vm);
         }
@@ -89,7 +98,7 @@ namespace MyTasks.Controllers
                     Task = task,
                     Heading = task.Id == 0 ?
                     "Dodawanie nowego zadania" : "Edytowanie zadania",
-                    Categories = _taskService.GetCategiories()
+                    Categories = _taskService.GetCategories(userId)
                 };
 
                 return View("Task", vm);
@@ -134,6 +143,89 @@ namespace MyTasks.Controllers
             try
             {
                 _taskService.Finish(id, userId);
+            }
+            catch (Exception e)
+            {
+
+                //logowanie do pliku
+                return Json(new { success = false, message = e.Message });
+            }
+
+            return Json(new { success = true });
+        }
+        public IActionResult Category()
+        {
+
+            var userId = User.GetUserId();
+
+            if (!_taskService.GetCategories(userId).Any())
+            {
+                var category = new Category
+                {
+                    Name = "Ogólna",
+                    UserId = userId
+                };
+
+                _taskService.Add(category);
+            }
+
+            return View(_taskService.GetCategories(userId));
+        }
+
+        public IActionResult AddCategory(int id = 0)
+        {
+
+            var userId = User.GetUserId();
+
+            var category = id == 0 ? new Category() : _taskService.GetCategory(id, userId);
+
+            var vm = new CategoryViewModel
+            {
+                Heading = id == 0 ?
+                "Dodawanie nowej kategorii" : "Edycja kategorii",
+                Category = category
+            };
+
+            return View(vm);
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddCategory(Category category)
+        {
+            var userId = User.GetUserId();
+
+            category.UserId = userId;
+
+            if (!ModelState.IsValid)
+            {
+                var vm = new CategoryViewModel
+                {
+                    Heading = category.Id == 0 ?
+                    "Dodawanie nowej kategorii" : "Edycja kategorii",
+                    Category = category
+                };
+
+                return View("AddCategory", vm);
+            }
+
+            if (category.Id == 0)
+                _taskService.Add(category);
+
+            else
+                _taskService.Update(category);
+
+
+            return RedirectToAction("Category");
+        }
+        [HttpPost]
+        public IActionResult DeleteCategory(int id)
+        {
+            var userId = User.GetUserId();
+
+            try
+            {
+                _taskService.DeleteCategory(id, userId);
+
             }
             catch (Exception e)
             {

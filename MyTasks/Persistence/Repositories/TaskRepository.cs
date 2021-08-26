@@ -33,12 +33,6 @@ namespace MyTasks.Persistence.Repositories
 
 
         }
-
-        public IEnumerable<Category> GetCategiories()
-        {
-            return _context.Categories.OrderBy(x => x.Name).ToList();
-        }
-
         public Task Get(int id, string userId)
         {
             return _context.Tasks.Single(x => x.Id == id && x.UserId == userId);

@@ -8,7 +8,6 @@ namespace MyTasks.Core.Repositories
     public interface ITaskRepository
     {
         IEnumerable<Task> Get(string userId, bool isExecuted = false, int categoryId = 0, string title = null);
-        IEnumerable<Category> GetCategiories();
         Task Get(int id, string userId);
         void Update(Task task);
         void Add(Task task);
